@@ -1,0 +1,210 @@
+import 'package:bookhive/controllers/book_controller.dart';
+import 'package:bookhive/views/add_book_view.dart';
+import 'package:bookhive/views/widgets/more_options_bottom_sheet_all_books.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+
+class AllBooksView extends StatefulWidget {
+  const AllBooksView({super.key});
+
+  @override
+  State<AllBooksView> createState() => _AllBooksViewState();
+}
+
+class _AllBooksViewState extends State<AllBooksView> {
+  final BookController bookController = Get.put(BookController());
+
+  @override
+  void initState() {
+    super.initState();
+    bookController.fetchBooks(); // Fetch books when the screen loads
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      floatingActionButton: Container(
+        height: 72,
+        width: 72,
+        decoration: BoxDecoration(
+          color: const Color(0xff3CBBB1),
+          shape: BoxShape.circle,
+        ),
+        child: FloatingActionButton(
+          onPressed: () {
+            Get.to(AddBookView()); // Navigate to AddBookView
+          },
+          child: const Icon(
+            Icons.add,
+            color: Colors.white,
+            size: 30,
+          ),
+          backgroundColor: const Color(0xff3CBBB1),
+          shape: const CircleBorder(),
+          mini: false,
+        ),
+      ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      Get.back(); // Navigate back
+                    },
+                    child: Container(
+                      height: 46,
+                      width: 46,
+                      decoration: BoxDecoration(
+                        color: const Color(0xffF2F2F5),
+                        borderRadius: BorderRadius.circular(50),
+                      ),
+                      child: const Center(
+                        child: Icon(
+                          Icons.arrow_back_ios,
+                          size: 18,
+                          color: Color(0xff1F1C33),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const Text(
+                    "BOOK HIVE",
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 20,
+                      fontFamily: "Pulp",
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(width: 46), // Spacer for alignment
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: bookController.searchController,
+                      onChanged: (value) {
+                        bookController.filterBooksByGenre(value);
+                      },
+                      decoration: InputDecoration(
+                        hintText: "Search by Genre",
+                        prefixIcon: const Icon(Icons.search),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: Obx(() {
+                if (bookController.isLoading.value) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (bookController.filteredBooks.isEmpty) {
+                  return const Center(
+                    child: Text(
+                      "No books found for this genre.",
+                      style: TextStyle(fontSize: 16, color: Colors.black54),
+                    ),
+                  );
+                }
+
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: ListView.builder(
+                    itemCount: bookController.filteredBooks.length,
+                    itemBuilder: (context, index) {
+                      final book = bookController.filteredBooks[index];
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: Container(
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            color: const Color(0xffE6E6E6),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 15, vertical: 10),
+                            child: ListTile(
+                              trailing: Container(
+                                height: 28,
+                                width: 28,
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                      width: 1, color: const Color(0xff3B3654)),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: InkWell(
+                                  onTap: () {
+                                    showModalBottomSheet(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return MoreOptionsBottomSheetAllBooks(
+                                          authorName: book.author,
+                                          bookName: book.title,
+                                          description: book.description,
+                                          dateTime: book.createdAt,
+                                          genre: book.genre,
+                                          id: book.id,
+                                        );
+                                      },
+                                    );
+                                  },
+                                  child: const Icon(
+                                    Icons.more_horiz,
+                                    color: Color(0xff7F789D),
+                                    size: 18,
+                                  ),
+                                ),
+                              ),
+                              leading: CircleAvatar(
+                                backgroundColor: const Color(0xff3CBBB1),
+                                child: Text(
+                                  book.title[0].toUpperCase(),
+                                  style: const TextStyle(color: Colors.white),
+                                ),
+                              ),
+                              title: Text(
+                                book.title,
+                                style: const TextStyle(
+                                  fontFamily: "Pulp",
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              subtitle: Text(
+                                "Author: ${book.author}\nGenre: ${book.genre}",
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontFamily: "Pulp",
+                                ),
+                              ),
+                              isThreeLine: true,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                );
+              }),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
