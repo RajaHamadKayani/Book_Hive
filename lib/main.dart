@@ -1,6 +1,7 @@
 import 'package:bookhive/firebase_options.dart';
 import 'package:bookhive/views/add_book_view.dart';
 import 'package:bookhive/views/all_books_view.dart';
+import 'package:bookhive/views/splash_view.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -30,7 +31,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const AllBooksView(),
+      home: const SplashView(),
     );
   }
 }

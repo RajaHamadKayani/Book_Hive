@@ -1,17 +1,39 @@
 import 'package:bookhive/models/book_model.dart';
+import 'package:bookhive/models/user_model.dart';
+import 'package:bookhive/services/auth_services.dart';
 import 'package:bookhive/services/firestore_services.dart';
 import 'package:bookhive/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class BookController extends GetxController {
-  final BookService _bookService = BookService();
+    final AuthService _authService = AuthService();
 
+  final BookService _bookService = BookService();
+ var currentUser = Rxn<UserModel>(); // Reactive variable to store the user
+  var isLoadingUser = false.obs; // Loading indicator for user data
   // Observables
   var books = <Book>[].obs;
   var isLoading = false.obs;
   var filteredBooks = <Book>[].obs; // Observable for filtered books
     var searchController = TextEditingController();
+    @override
+     onInit(){
+      super.onInit();
+      fetchCurrentUser();
+      
+    }
+      // Fetch the current user data
+  Future<void> fetchCurrentUser() async {
+    isLoadingUser.value = true;
+    try {
+      currentUser.value = await _authService.fetchCurrentUser();
+    } catch (e) {
+      Get.snackbar("Error", e.toString());
+    } finally {
+      isLoadingUser.value = false;
+    }
+  }
 
 
   var textEditingControllerTitle = TextEditingController().obs;

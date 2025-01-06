@@ -1,6 +1,9 @@
 import 'package:bookhive/controllers/book_controller.dart';
+import 'package:bookhive/utils/toast_util.dart';
 import 'package:bookhive/views/add_book_view.dart';
+import 'package:bookhive/views/authentication_view/login_view.dart';
 import 'package:bookhive/views/widgets/more_options_bottom_sheet_all_books.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -46,6 +49,8 @@ class _AllBooksViewState extends State<AllBooksView> {
       ),
       body: SafeArea(
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
@@ -81,10 +86,50 @@ class _AllBooksViewState extends State<AllBooksView> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(width: 46), // Spacer for alignment
+                  IconButton(
+                      onPressed: () {
+                        FirebaseAuth.instance.signOut();
+                        ToastUtil.showToast(message: "Logout Succesfully");
+                        Get.off(LoginView());
+                      },
+                      icon: Icon(
+                        Icons.logout,
+                        color: Colors.black,
+                      ))
                 ],
               ),
             ),
+            Obx(() {
+              if (bookController.isLoadingUser.value) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+              if (bookController.currentUser.value == null) {
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: const Text(
+                    "Welcome!",
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.black54,
+                    ),
+                  ),
+                );
+              }
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Text(
+                  "Welcome, ${bookController.currentUser.value!.name}!",
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w400,
+                    fontFamily: "Pulp",
+                    color: Colors.black,
+                  ),
+                ),
+              );
+            }),
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Row(
